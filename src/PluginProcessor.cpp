@@ -1,9 +1,9 @@
 /*
-  ==============================================================================
+	==============================================================================
 
 	This file contains the basic framework code for a JUCE plugin processor.
 
-  ==============================================================================
+	==============================================================================
 */
 
 #include "PluginProcessor.h"
@@ -11,36 +11,36 @@
 
 //==============================================================================
 FosterPEQAudioProcessor::FosterPEQAudioProcessor()
+		:
 #ifndef JucePlugin_PreferredChannelConfigurations
-	: AudioProcessor(BusesProperties()
-#if ! JucePlugin_IsMidiEffect
-#if ! JucePlugin_IsSynth
-		.withInput("Input", juce::AudioChannelSet::stereo(), true)
+			AudioProcessor(BusesProperties()
+												 .withInput("Input", juce::AudioChannelSet::stereo(), true)
+												 .withOutput("Output", juce::AudioChannelSet::stereo(), true)),
 #endif
-		.withOutput("Output", juce::AudioChannelSet::stereo(), true)
-#endif
-	), params(*this, nullptr, juce::Identifier("FosterPEQ"), {
-		// low band params
-		std::make_unique<juce::AudioParameterFloat>(
-			juce::ParameterID("low_gain", 0), "Low Gain", -20.0, 20.0, 0.0),
-		std::make_unique<juce::AudioParameterFloat>(
-			juce::ParameterID("low_freq", 0), "Low Frequency", 10.0, 1000.0, 500.0),
-		std::make_unique<juce::AudioParameterBool>(
-			juce::ParameterID("low_shelf", 0), "Low Shelf", false),
-		// mid band params
-		std::make_unique<juce::AudioParameterFloat>(
-			juce::ParameterID("mid_gain", 0), "Mid Gain", -20.0, 20.0, 0.0),
-		std::make_unique<juce::AudioParameterFloat>(
-			juce::ParameterID("mid_freq", 0), "Mid Frequency", 500.0, 5000.0, 2000.0),
-		// high band params
-		std::make_unique<juce::AudioParameterFloat>(
-			juce::ParameterID("high_gain", 0), "High Gain", -20.0, 20.0, 0.0),
-		std::make_unique<juce::AudioParameterFloat>(
-			juce::ParameterID("high_freq", 0), "High Frequency", 2000.0, 10000.0, 5000.0),
-		std::make_unique<juce::AudioParameterBool>(
-			juce::ParameterID("high_shelf", 0), "High Shelf", false)
-		})
-#endif
+			params(*this, nullptr, juce::Identifier("FosterPEQ"),
+						 {// PARAMETERS
+
+							// low band params
+							std::make_unique<juce::AudioParameterFloat>(
+									juce::ParameterID("low_gain", 1), "Low Gain", -20.0, 20.0, 0.0),
+							std::make_unique<juce::AudioParameterFloat>(
+									juce::ParameterID("low_freq", 1), "Low Frequency", 10.0, 19000.0, 500.0),
+							std::make_unique<juce::AudioParameterBool>(
+									juce::ParameterID("low_shelf", 1), "Low Shelf", false),
+
+							// mid band params
+							std::make_unique<juce::AudioParameterFloat>(
+									juce::ParameterID("mid_gain", 1), "Mid Gain", -20.0, 20.0, 0.0),
+							std::make_unique<juce::AudioParameterFloat>(
+									juce::ParameterID("mid_freq", 1), "Mid Frequency", 10.0, 19000.0, 2000.0),
+
+							// high band params
+							std::make_unique<juce::AudioParameterFloat>(
+									juce::ParameterID("high_gain", 1), "High Gain", -20.0, 20.0, 0.0),
+							std::make_unique<juce::AudioParameterFloat>(
+									juce::ParameterID("high_freq", 1), "High Frequency", 10.0, 19000.0, 5000.0),
+							std::make_unique<juce::AudioParameterBool>(
+									juce::ParameterID("high_shelf", 1), "High Shelf", false)})
 {
 	DBG("constructed");
 
@@ -52,7 +52,6 @@ FosterPEQAudioProcessor::FosterPEQAudioProcessor()
 	pHighGain = params.getRawParameterValue("high_gain");
 	pHighFreq = params.getRawParameterValue("high_freq");
 	pHighShelf = params.getRawParameterValue("high_shelf");
-
 }
 
 FosterPEQAudioProcessor::~FosterPEQAudioProcessor()
@@ -99,8 +98,8 @@ double FosterPEQAudioProcessor::getTailLengthSeconds() const
 
 int FosterPEQAudioProcessor::getNumPrograms()
 {
-	return 1;   // NB: some hosts don't cope very well if you tell them there are 0 programs,
-	// so this should be at least 1, even if you're not really implementing programs.
+	return 1; // NB: some hosts don't cope very well if you tell them there are 0 programs,
+						// so this should be at least 1, even if you're not really implementing programs.
 }
 
 int FosterPEQAudioProcessor::getCurrentProgram()
@@ -110,29 +109,35 @@ int FosterPEQAudioProcessor::getCurrentProgram()
 
 void FosterPEQAudioProcessor::setCurrentProgram(int index)
 {
+	juce::ignoreUnused(index);
 }
 
 const juce::String FosterPEQAudioProcessor::getProgramName(int index)
 {
+	juce::ignoreUnused(index);
 	return {};
 }
 
-void FosterPEQAudioProcessor::changeProgramName(int index, const juce::String& newName)
+void FosterPEQAudioProcessor::changeProgramName(int index, const juce::String &newName)
 {
+	juce::ignoreUnused(index, newName);
 }
 
 //==============================================================================
 void FosterPEQAudioProcessor::prepareToPlay(double sampleRate, int samplesPerBlock)
 {
+	juce::ignoreUnused(sampleRate, samplesPerBlock);
+
 	// Use this method as the place to do any pre-playback
 	// initialisation that you need..
 
-	for (int c = 0; c < 2; c++) {
-		for (int b = 0; b < 3; b++) {
+	for (int c = 0; c < 2; c++)
+	{
+		for (int b = 0; b < 3; b++)
+		{
 			filters[c][b].reset(new Biquad(*this));
 		}
 	}
-
 }
 
 void FosterPEQAudioProcessor::releaseResources()
@@ -142,7 +147,7 @@ void FosterPEQAudioProcessor::releaseResources()
 }
 
 #ifndef JucePlugin_PreferredChannelConfigurations
-bool FosterPEQAudioProcessor::isBusesLayoutSupported(const BusesLayout& layouts) const
+bool FosterPEQAudioProcessor::isBusesLayoutSupported(const BusesLayout &layouts) const
 {
 #if JucePlugin_IsMidiEffect
 	juce::ignoreUnused(layouts);
@@ -152,12 +157,11 @@ bool FosterPEQAudioProcessor::isBusesLayoutSupported(const BusesLayout& layouts)
 	// In this template code we only support mono or stereo.
 	// Some plugin hosts, such as certain GarageBand versions, will only
 	// load plugins that support stereo bus layouts.
-	if (layouts.getMainOutputChannelSet() != juce::AudioChannelSet::mono()
-		&& layouts.getMainOutputChannelSet() != juce::AudioChannelSet::stereo())
+	if (layouts.getMainOutputChannelSet() != juce::AudioChannelSet::mono() && layouts.getMainOutputChannelSet() != juce::AudioChannelSet::stereo())
 		return false;
 
-	// This checks if the input layout matches the output layout
-#if ! JucePlugin_IsSynth
+		// This checks if the input layout matches the output layout
+#if !JucePlugin_IsSynth
 	if (layouts.getMainOutputChannelSet() != layouts.getMainInputChannelSet())
 		return false;
 #endif
@@ -167,8 +171,10 @@ bool FosterPEQAudioProcessor::isBusesLayoutSupported(const BusesLayout& layouts)
 }
 #endif
 
-void FosterPEQAudioProcessor::processBlock(juce::AudioBuffer<float>& buffer, juce::MidiBuffer& midiMessages)
+void FosterPEQAudioProcessor::processBlock(juce::AudioBuffer<float> &buffer, juce::MidiBuffer &midiMessages)
 {
+	juce::ignoreUnused(midiMessages);
+
 	juce::ScopedNoDenormals noDenormals;
 	auto totalNumInputChannels = getTotalNumInputChannels();
 	auto totalNumOutputChannels = getTotalNumOutputChannels();
@@ -189,15 +195,16 @@ void FosterPEQAudioProcessor::processBlock(juce::AudioBuffer<float>& buffer, juc
 	// Alternatively, you can process the samples with the channels
 	// interleaved by keeping the same state.
 
-	float q = 0.707;
+	float q = 0.707f;
 
 	for (int channel = 0; channel < totalNumInputChannels; ++channel)
 	{
-		filters[channel][0]->set((*pLowShelf) ? Biquad::TYPE_SHELF_LOW : Biquad::TYPE_PEAK, *pLowFreq, *pLowGain, q);
+		filters[channel][0]->set((*pLowShelf > 0) ? Biquad::TYPE_SHELF_LOW : Biquad::TYPE_PEAK, *pLowFreq, *pLowGain, q);
 		filters[channel][1]->set(Biquad::TYPE_PEAK, *pMidFreq, *pMidGain, q);
-		filters[channel][2]->set((*pHighShelf) ? Biquad::TYPE_SHELF_HIGH : Biquad::TYPE_PEAK, *pHighFreq, *pHighGain, q);
-		float* channelData = buffer.getWritePointer(channel);
-		for (int i = 0; i < buffer.getNumSamples(); i++) {
+		filters[channel][2]->set((*pHighShelf > 0) ? Biquad::TYPE_SHELF_HIGH : Biquad::TYPE_PEAK, *pHighFreq, *pHighGain, q);
+		float *channelData = buffer.getWritePointer(channel);
+		for (int i = 0; i < buffer.getNumSamples(); i++)
+		{
 			float y = channelData[i];
 
 			y = filters[channel][0]->run(y);
@@ -215,13 +222,13 @@ bool FosterPEQAudioProcessor::hasEditor() const
 	return true; // (change this to false if you choose to not supply an editor)
 }
 
-juce::AudioProcessorEditor* FosterPEQAudioProcessor::createEditor()
+juce::AudioProcessorEditor *FosterPEQAudioProcessor::createEditor()
 {
 	return new FosterPEQAudioProcessorEditor(*this, params);
 }
 
 //==============================================================================
-void FosterPEQAudioProcessor::getStateInformation(juce::MemoryBlock& destData)
+void FosterPEQAudioProcessor::getStateInformation(juce::MemoryBlock &destData)
 {
 	// You should use this method to store your parameters in the memory block.
 	// You could do that either as raw data, or use the XML or ValueTree classes
@@ -239,7 +246,7 @@ void FosterPEQAudioProcessor::getStateInformation(juce::MemoryBlock& destData)
 	copyXmlToBinary(*xml, destData);
 }
 
-void FosterPEQAudioProcessor::setStateInformation(const void* data, int sizeInBytes)
+void FosterPEQAudioProcessor::setStateInformation(const void *data, int sizeInBytes)
 {
 	// You should use this method to restore your parameters from this memory block,
 	// whose contents will have been created by the getStateInformation() call.
@@ -250,8 +257,10 @@ void FosterPEQAudioProcessor::setStateInformation(const void* data, int sizeInBy
 	std::unique_ptr<juce::XmlElement> xml(getXmlFromBinary(data, sizeInBytes));
 
 	// ensure state is valid
-	if (xml.get() == nullptr) return;
-	if (!xml->hasTagName(params.state.getType())) return;
+	if (xml.get() == nullptr)
+		return;
+	if (!xml->hasTagName(params.state.getType()))
+		return;
 
 	// swap current value tree for the one in the memory block
 	params.replaceState(juce::ValueTree::fromXml(*xml));
@@ -259,7 +268,7 @@ void FosterPEQAudioProcessor::setStateInformation(const void* data, int sizeInBy
 
 //==============================================================================
 // This creates new instances of the plugin..
-juce::AudioProcessor* JUCE_CALLTYPE createPluginFilter()
+juce::AudioProcessor *JUCE_CALLTYPE createPluginFilter()
 {
 	return new FosterPEQAudioProcessor();
 }

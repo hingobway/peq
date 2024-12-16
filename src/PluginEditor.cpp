@@ -1,9 +1,9 @@
 /*
-  ==============================================================================
+	==============================================================================
 
 	This file contains the basic framework code for a JUCE plugin editor.
 
-  ==============================================================================
+	==============================================================================
 */
 
 #include "PluginProcessor.h"
@@ -12,8 +12,8 @@
 #include "utilities.h"
 
 //==============================================================================
-FosterPEQAudioProcessorEditor::FosterPEQAudioProcessorEditor(FosterPEQAudioProcessor& p, juce::AudioProcessorValueTreeState& vts)
-	: AudioProcessorEditor(&p), audioProcessor(p), vts(vts)
+FosterPEQAudioProcessorEditor::FosterPEQAudioProcessorEditor(FosterPEQAudioProcessor &p, juce::AudioProcessorValueTreeState &vts_)
+		: AudioProcessorEditor(&p), audioProcessor(p), vts(vts_)
 {
 
 	addAndMakeVisible(titleBlock);
@@ -24,7 +24,6 @@ FosterPEQAudioProcessorEditor::FosterPEQAudioProcessorEditor(FosterPEQAudioProce
 	setSize(700, 400);
 	setResizable(true, false);
 	setResizeLimits(665, 425, 2000, 1000);
-
 }
 
 FosterPEQAudioProcessorEditor::~FosterPEQAudioProcessorEditor()
@@ -32,7 +31,7 @@ FosterPEQAudioProcessorEditor::~FosterPEQAudioProcessorEditor()
 }
 
 //==============================================================================
-void FosterPEQAudioProcessorEditor::paint(juce::Graphics& g)
+void FosterPEQAudioProcessorEditor::paint(juce::Graphics &g)
 {
 	// (Our component is opaque, so we must completely fill the background with a solid colour)
 	g.fillAll(util::hexA(util::TW_ZINC_900, 1));
@@ -47,7 +46,7 @@ void FosterPEQAudioProcessorEditor::resized()
 	{
 		fb.items.add(juce::FlexItem(titleBlock).withHeight(48));
 		fb.items.add(juce::FlexItem().withHeight(GAP));
-		
+
 		fb.items.add(juce::FlexItem(*bands.get()).withFlex(1));
 	}
 

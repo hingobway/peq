@@ -1,21 +1,19 @@
 #pragma once
 
-#include <JuceHeader.h>
-
 #include "../utilities.h"
 #include "Knob.h"
 #include "LAFs.h"
 
 //==============================================================================
 /*
-*/
+ */
 class Band : public juce::Component
 {
 public:
 	typedef juce::AudioProcessorValueTreeState::SliderAttachment SliderAttachment;
 	typedef juce::AudioProcessorValueTreeState::ButtonAttachment ButtonAttachment;
 
-	Band(juce::AudioProcessorValueTreeState& vts, juce::String name, bool shelf) : vts(vts), name(name), shelf(shelf)
+	Band(juce::AudioProcessorValueTreeState &vts_, juce::String name_, bool shelf_) : vts(vts_), name(name_), shelf(shelf_)
 	{
 		std::stringstream gname{};
 		gname << name << "_gain";
@@ -24,12 +22,13 @@ public:
 		fname << name << "_freq";
 		knobFreq.reset(new Knob(vts, fname.str(), true));
 
-		if (shelf) {
+		if (shelf)
+		{
 			buttonShelf.setLookAndFeel(&lafTextButton);
 			buttonShelf.setButtonText("shelf");
-			buttonShelf.setColour(juce::TextButton::buttonColourId, util::hexA(util::TW_ZINC_600, 0.8));
+			buttonShelf.setColour(juce::TextButton::buttonColourId, util::hexA(util::TW_ZINC_600, 0.8f));
 			buttonShelf.setColour(juce::TextButton::buttonOnColourId, util::hexA(util::TW_SKY_600, 1));
-			//buttonShelf.setToggleable(true);
+			// buttonShelf.setToggleable(true);
 			buttonShelf.setClickingTogglesState(true);
 
 			std::stringstream sname{};
@@ -40,7 +39,7 @@ public:
 		}
 
 		labelName.setText(name, juce::dontSendNotification);
-		labelName.setFont(juce::Font(18.0, juce::Font::bold));
+		labelName.setFont(juce::FontOptions(18.0, juce::Font::bold));
 		labelName.setColour(juce::Label::textColourId, util::hexA(util::TW_ZINC_100, 1));
 		labelName.setJustificationType(juce::Justification::centred);
 
@@ -49,7 +48,7 @@ public:
 		addAndMakeVisible(knobFreq.get());
 	}
 
-	void paint(juce::Graphics& g) override
+	void paint(juce::Graphics &g) override
 	{
 		juce::Path p;
 		p.addRoundedRectangle(getLocalBounds().toFloat(), 8);
@@ -78,15 +77,13 @@ public:
 			fb.items.add(juce::FlexItem().withHeight(48));
 
 			fb.items.add(juce::FlexItem(buttonShelf).withHeight(36));
-
-
 		}
 
 		fb.performLayout(getLocalBounds().reduced(10));
 	}
 
 private:
-	juce::AudioProcessorValueTreeState& vts;
+	juce::AudioProcessorValueTreeState &vts;
 
 	juce::String name;
 	bool shelf;
@@ -110,9 +107,11 @@ private:
 	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(Band)
 };
 
-class BandWrapper : public juce::Component {
+class BandWrapper : public juce::Component
+{
 public:
-	BandWrapper(juce::AudioProcessorValueTreeState& vts) {
+	BandWrapper(juce::AudioProcessorValueTreeState &vts)
+	{
 		//    band constructor(  , "band name" , with shelf  )
 		bandLow.reset(new Band(vts, "low", true));
 		bandMid.reset(new Band(vts, "mid", false));
@@ -122,14 +121,16 @@ public:
 		addAndMakeVisible(bandHigh.get());
 	}
 
-	void paint(juce::Graphics& g) override {
+	void paint(juce::Graphics &g) override
+	{
 		juce::Path p;
 		p.addRoundedRectangle(getLocalBounds(), 8 + GAP);
 		g.setColour(util::hexA(util::TW_ZINC_700, 1));
 		g.fillPath(p);
 	}
 
-	void resized() override {
+	void resized() override
+	{
 
 		juce::FlexBox fb;
 
@@ -146,7 +147,6 @@ public:
 	}
 
 private:
-
 	int GAP = 10;
 
 	std::unique_ptr<Band> bandLow;
